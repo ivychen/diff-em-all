@@ -7,6 +7,12 @@
 
 using namespace std;
 
+struct Edit {
+    string type;
+    string pre_line;
+    string pos_line;
+};
+
 class Differ {
 public:
     virtual void read() = 0;
@@ -30,6 +36,7 @@ private:
     vector<string> origin;
     vector<string> update;
     vector<vector<int>> trace;
+    vector<Edit> result;
 };
 
 File_Differ::File_Differ(const string& o, const string& u) 
@@ -81,14 +88,13 @@ int File_Differ::compare() {
     int n = origin.size();
     int m = update.size();
     int max = n + m;
-    cout << "max is: " << max << "\n";
+    //cout << "max is: " << max << "\n";
 
     vector<int> v(2 * max + 1);
     v[1+max] = 0;
     int d, k, x, y;
 
     for (d = 0; d <= max; d=d+1) {
-        
         for (k = -d; k <= d; k=k+2) {
             //cout << "k: " << k << "\n";
             if ( k == -d || (k != d && v[k - 1 + max] < v[k + 1 + max])) {
@@ -106,7 +112,7 @@ int File_Differ::compare() {
             //cout << "x: " << x << "\n";
             v[k + max] = x;
             if (x >= n && y >= m) {
-                cout << "d: " << d << "\n";
+                //cout << "d: " << d << "\n";
                 trace.push_back(v);
                 return d;
             }
@@ -118,14 +124,66 @@ int File_Differ::compare() {
 }
 
 void File_Differ::output(int real_d) {
-    cout << "size of trace: " << trace.size() << "\n";
+    //cout << "size of trace: " << trace.size() << "\n";
     reverse(trace.begin(), trace.end());
-    for (auto& t : trace) {
+    /*for (auto& t : trace) {
         for (auto& v : t) {
             cout << v << ",";
         }
         cout <<"\n";
+    }*/
+    int x = origin.size();
+    int y = update.size();
+    int max = origin.size() + update.size();
+    int k, prev_x, prev_k, prev_y;
+    for (int i = 0; i < trace.size() - 1; i++) {
+        //cout << "i: " << i << "\n";
+        k = x - y;
+        if (k == -(real_d - i) || (k != real_d && trace[i][k - 1 + max] < trace[i][k + 1 + max])) {
+            prev_k = k + 1;
+        }
+        else {
+            prev_k = k -1;
+        }
+        //cout << "prev_k: " << prev_k << "\n";
+        prev_x = trace[i+1][prev_k + max];
+        prev_y = prev_x - prev_k;
+        /*cout << "prev_k: " << prev_k << "\n";
+        cout << "prev_x: " << prev_x << "\n";
+        cout << "prev_y: " << prev_y << "\n";*/
+
+        while (x > prev_x && y > prev_y) {
+            //cout << "while loop is called.\n";
+            //cout << x - 1 << y - 1 << x << y << "\n";
+            result.push_back(Edit{"eql", origin[x-1], update[y-1]});
+            x = x - 1;
+            y = y - 1;
+        }
+        //cout << prev_x << prev_y << x << y << "\n";
+        if (x == prev_x) {
+            result.push_back(Edit{"ins", "", update[prev_y]});
+        }
+        else if (y == prev_y) {
+            result.push_back(Edit{"del", origin[prev_x], ""});
+        }
+        x = prev_x;
+        y = prev_y;
     }
+
+    reverse(result.begin(), result.end());
+
+    for (auto& t : result) {
+        if (t.type == "del") {
+            cout << "- " << t.pre_line << "\n";
+        }
+        else if (t.type == "ins") {
+            cout << "+ " << t.pos_line << "\n";
+        }
+        else {
+            cout << "  " << t.pre_line << "\n";
+        }
+    }
+
 }
 
 
