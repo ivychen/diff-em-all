@@ -3,34 +3,63 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+// Use quoted form of #include. See https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else.
+#include "diff.h"
 //#include <filesystem>
 
 using namespace std;
 
-struct Edit {
-    string type;
-    string pre_line;
-    string pos_line;
-};
+//////////////////////////
+//
+// Edit Class
+//
+//////////////////////////
 
-template <typename T>
-class Differ {
-public:
-    Differ(const T&, const T&);
-    void read();
-    void compare();
-    void output();
-    ~Differ() {};
+/**
+ * Constructor. Initialized the diff with the provided values.
+ * @param operation One of INSERT, DELETE, EQUAL.
+ * @param pre_line The original text associated with this operation.
+ * @param pos_line The new text associated with this operation.
+ */
+Edit::Edit(Operation _operation, const string& _pre_line, const string& _pos_line) :
+    operation(_operation), pre_line(_pre_line), pos_line(_pos_line) {
+    // Construct an edit with specified operation and text. 
+}
 
-private:
-    const T& input1;
-    const T& input2;
-    vector<T> original;
-    vector<T> updated;
-    vector<vector<int>> trace;
-    vector<Edit> result;
-};
+Edit::Edit() {
+}
 
+string Edit::strOperation(Operation op) {
+    switch(op) {
+        case Operation::INSERT:
+            return "+";
+        case Operation::DELETE:
+            return "-";
+        case Operation::EQUAL:
+            return " ";
+    }
+    throw "Invalid operation.";
+}
+
+/**
+ * Display a human-readable version of this Edit.
+ * @return text version
+ */
+string Edit::toString() const {
+    string text;
+    if (operation == Operation::DELETE) {
+        text = pre_line;
+    } else {
+        text = pos_line;
+    }
+    return strOperation(operation) + " " + text;
+}
+
+//////////////////////////
+//
+// Differ Class
+//
+//////////////////////////
 template <typename T>
 Differ<T>::Differ(const T& o, const T& u)
     : input1 {o}, input2 {u} {
@@ -129,15 +158,15 @@ void Differ<T>::output() {
         prev_x = trace[i+1][prev_k + max];
         prev_y = prev_x - prev_k;
         while (x > prev_x && y > prev_y) {
-            result.push_back(Edit{"eql", original[x-1], updated[y-1]});
+            result.push_back(Edit(Operation::EQUAL, original[x-1], updated[y-1]));
             x = x - 1;
             y = y - 1;
         }
         if (x == prev_x) {
-            result.push_back(Edit{"ins", "", updated[prev_y]});
+            result.push_back(Edit(Operation::INSERT, "", updated[prev_y]));
         }
         else if (y == prev_y) {
-            result.push_back(Edit{"del", original[prev_x], ""});
+            result.push_back(Edit(Operation::DELETE, original[prev_x], ""));
         }
         x = prev_x;
         y = prev_y;
@@ -146,15 +175,7 @@ void Differ<T>::output() {
     reverse(result.begin(), result.end());
 
     for (auto& t : result) {
-        if (t.type == "del") {
-            cout << "- " << t.pre_line << "\n";
-        }
-        else if (t.type == "ins") {
-            cout << "+ " << t.pos_line << "\n";
-        }
-        else {
-            cout << "  " << t.pre_line << "\n";
-        }
+        cout << t.toString() << endl;
     }
 }
 
