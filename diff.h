@@ -23,6 +23,14 @@ enum class Operation {
 };
 
 /**
+ * Enum represents diff mode.
+ */
+enum class Mode {
+    CHARACTER,
+    LINE,
+};
+
+/**
  * Class representing a single diff edit operation.
  */
 class Edit {
@@ -49,11 +57,30 @@ class Edit {
  */
 template <typename T>
 class Differ {
+
+    public:
+        // Default configuration.
+        Mode diff_mode = Mode::LINE;
+
     public:
         Differ(const T&, const T&);
+        Differ();
+
+        /**
+         * Read and parse inputs.
+         */
         void read();
+
+        /**
+         * Find the differences between two text inputs.
+         */
         void compare();
+
+        /**
+         * Outputs the diff result.
+         */
         void output();
+        
         ~Differ(){};
 
     private:
@@ -63,6 +90,17 @@ class Differ {
         std::vector<T> updated;
         std::vector<std::vector<int>> trace;
         std::vector<Edit> result;
+
+        /**
+         * Read and parse inputs from files.
+         */
+        void parse_files();
+
+        /**
+         * Read and parse inputs from raw text.
+         */
+        void parse_text();
+
 };
 
 #endif // DIFF_H

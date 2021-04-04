@@ -60,6 +60,7 @@ string Edit::toString() const {
 // Differ Class
 //
 //////////////////////////
+
 template <typename T>
 Differ<T>::Differ(const T& o, const T& u)
     : input1 {o}, input2 {u} {
@@ -78,6 +79,11 @@ Differ<T>::Differ(const T& o, const T& u)
 
 template <typename T>
 void Differ<T>::read() {
+    parse_files();
+}
+
+template <typename T>
+void Differ<T>::parse_files() {
     string line;
 
     ifstream original_ifs {input1};
@@ -106,8 +112,12 @@ void Differ<T>::read() {
 }
 
 template <typename T>
+void Differ<T>::parse_text() {
+
+}
+
+template <typename T>
 void Differ<T>::compare() {
-    
     int n = original.size();
     int m = updated.size();
     int max = n + m;
@@ -183,7 +193,7 @@ void Differ<T>::output() {
 int main(int argc, const char* argv[]) {
 
     if (argc != 3) {
-        cout << "Two files are expected\n.";
+        cout << "Two arguments are expected\n.";
         return -1;
     }
 
