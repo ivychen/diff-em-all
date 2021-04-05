@@ -1,6 +1,7 @@
 #ifndef DIFF_H
 #define DIFF_H
 
+#include <list>
 #include <string>
 #include <vector>
 
@@ -63,13 +64,12 @@ class Differ {
         Mode diff_mode = Mode::LINE;
 
     public:
-        Differ(const T&, const T&);
         Differ();
 
         /**
          * Read and parse inputs.
          */
-        void read();
+        void read(const T&, const T&);
 
         /**
          * Find the differences between two text inputs.
@@ -77,30 +77,36 @@ class Differ {
         void compare();
 
         /**
+         * Find the differences between two text inputs.
+         */
+        void compare(T& input1, T& input2);
+
+        /**
          * Outputs the diff result.
          */
-        void output();
+        std::vector<Edit> output();
         
         ~Differ(){};
 
     private:
-        const T& input1;
-        const T& input2;
         std::vector<T> original;
         std::vector<T> updated;
         std::vector<std::vector<int>> trace;
-        std::vector<Edit> result;
 
         /**
          * Read and parse inputs from files.
          */
-        void parse_files();
+        void parse_files(const T&, const T&);
 
         /**
          * Read and parse inputs from raw text.
          */
         void parse_text();
 
+        /**
+         * Find the differences between two text inputs.
+         */
+        void compare(std::vector<T> original, std::vector<T> updated);
 };
 
 #endif // DIFF_H

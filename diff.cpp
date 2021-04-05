@@ -62,8 +62,8 @@ string Edit::toString() const {
 //////////////////////////
 
 template <typename T>
-Differ<T>::Differ(const T& o, const T& u)
-    : input1 {o}, input2 {u} {
+Differ<T>::Differ() :
+    diff_mode(Mode::LINE) {
 
     /*
      *path is not available unitl MacOS 10.15
@@ -78,16 +78,16 @@ Differ<T>::Differ(const T& o, const T& u)
 }
 
 template <typename T>
-void Differ<T>::read() {
-    parse_files();
+void Differ<T>::read(const T& o, const T& u) {
+    parse_files(o, u);
 }
 
 template <typename T>
-void Differ<T>::parse_files() {
+void Differ<T>::parse_files(const T& o, const T& u) {
     string line;
 
-    ifstream original_ifs {input1};
-    ifstream new_ifs {input2};
+    ifstream original_ifs {o};
+    ifstream new_ifs {u};
     if (original_ifs.is_open())
     {
         while (getline(original_ifs,line))
@@ -118,6 +118,11 @@ void Differ<T>::parse_text() {
 
 template <typename T>
 void Differ<T>::compare() {
+    return compare(original, updated);
+}
+
+template <typename T>
+void Differ<T>::compare(vector<T> original, vector<T> updated) {
     int n = original.size();
     int m = updated.size();
     int max = n + m;
@@ -146,11 +151,13 @@ void Differ<T>::compare() {
         }
         trace.push_back(v);
     }
-    return;
 }
 
 template <typename T>
-void Differ<T>::output() {
+vector<Edit> Differ<T>::output() {
+   // Compute the diff result.
+    vector<Edit> result;
+
     reverse(trace.begin(), trace.end());
     int d = trace.size() - 1;
     int x = original.size();
@@ -183,24 +190,24 @@ void Differ<T>::output() {
     }
 
     reverse(result.begin(), result.end());
-
-    for (auto& t : result) {
-        cout << t.toString() << endl;
-    }
+    return result;
 }
 
 
 int main(int argc, const char* argv[]) {
-
     if (argc != 3) {
         cout << "Two arguments are expected\n.";
         return -1;
     }
 
-    string file1 {argv[1]};
-    string file2 {argv[2]};
-    Differ<string> differ {file1, file2};
-    differ.read();
+    string original {argv[1]};
+    string updated {argv[2]};
+    Differ<string> differ;
+    differ.read(original, updated);
     differ.compare();
-    differ.output();
+    auto result = differ.output();
+
+    for (auto& edit : result) {
+        cout << edit.toString() << endl;
+    }
 }
