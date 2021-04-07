@@ -7,6 +7,11 @@
 #include "diff.h"
 //#include <filesystem>
 
+// The following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
+#define RESET   "\033[0m"
+#define RED     "\033[31m"      /* Red */
+#define GREEN   "\033[32m"      /* Green */
+
 using namespace std;
 
 //////////////////////////
@@ -29,7 +34,7 @@ Edit::Edit(Operation _operation, const string& _pre_line, const string& _pos_lin
 Edit::Edit() {
 }
 
-string Edit::strOperation(Operation op) {
+string Edit::opPrefix(Operation op) {
     switch(op) {
         case Operation::INSERT:
             return "+";
@@ -37,6 +42,18 @@ string Edit::strOperation(Operation op) {
             return "-";
         case Operation::EQUAL:
             return " ";
+    }
+    throw "Invalid operation.";
+}
+
+string Edit::opColor(Operation op) {
+    switch(op) {
+        case Operation::INSERT:
+            return GREEN;
+        case Operation::DELETE:
+            return RED;
+        case Operation::EQUAL:
+            return RESET;
     }
     throw "Invalid operation.";
 }
@@ -52,7 +69,7 @@ string Edit::toString() const {
     } else {
         text = pos_line;
     }
-    return strOperation(operation) + " " + text;
+    return opColor(operation) + opPrefix(operation) + " " + text + RESET;
 }
 
 //////////////////////////
@@ -93,6 +110,7 @@ void Differ<T>::parse_files(const T& o, const T& u) {
         while (getline(original_ifs,line))
         {
             if (line.size() > 0) {
+                line += '\n';
                 original.push_back(line);
             }
         }
@@ -104,6 +122,7 @@ void Differ<T>::parse_files(const T& o, const T& u) {
         while (getline(new_ifs,line))
         {
             if (line.size() > 0) {
+                line += '\n';
                 updated.push_back(line);
             }
         }
@@ -118,6 +137,23 @@ void Differ<T>::parse_text() {
 
 template <typename T>
 void Differ<T>::compare() {
+    return compare(original, updated);
+}
+
+template <typename T>
+void Differ<T>::compare(const T& input1, const T& input2) {
+    // Convert lines to characters.
+    for (auto c : input1) {
+        string s(1, c);
+        original.push_back(s);
+    }
+
+    for (auto c : input2) {
+        string s(1, c);
+        updated.push_back(s);
+    }
+
+    // Perform diff.
     return compare(original, updated);
 }
 
@@ -140,6 +176,7 @@ void Differ<T>::compare(vector<T> original, vector<T> updated) {
             }
             y = x - k;
             while (x < n && y < m && original[x] == updated[y]) {
+                // Skip over common substring
                 x = x + 1;
                 y = y + 1;
             }
@@ -155,15 +192,19 @@ void Differ<T>::compare(vector<T> original, vector<T> updated) {
 
 template <typename T>
 vector<Edit> Differ<T>::output() {
-   // Compute the diff result.
+    // Compute the diff result.
     vector<Edit> result;
 
+    // Reverse the trace.
     reverse(trace.begin(), trace.end());
+
     int d = trace.size() - 1;
     int x = original.size();
     int y = updated.size();
     int max = original.size() + updated.size();
     int k, prev_x, prev_k, prev_y;
+
+    // Iterate through the reversed trace to get the diff output.
     for (int i = 0; i < trace.size() - 1; i++) {
         k = x - y;
         if (k == -(d - i) || (k != d && trace[i][k - 1 + max] < trace[i][k + 1 + max])) {
@@ -189,6 +230,13 @@ vector<Edit> Differ<T>::output() {
         y = prev_y;
     }
 
+    // At the end of the trace run, x should equal y. We may have remaining tokens (all EQUAL operations) to include in the result so we iterate until both x and y are exhausted.
+    while (x == y && x > 0 && y > 0) {
+        result.push_back(Edit(Operation::EQUAL, original[x-1], updated[y-1]));
+        x--;
+        y--;
+    }
+
     reverse(result.begin(), result.end());
     return result;
 }
@@ -203,8 +251,9 @@ int main(int argc, const char* argv[]) {
     string original {argv[1]};
     string updated {argv[2]};
     Differ<string> differ;
-    differ.read(original, updated);
-    differ.compare();
+    // differ.read(original, updated);
+    // differ.compare();
+    differ.compare(original, updated);
     auto result = differ.output();
 
     for (auto& edit : result) {

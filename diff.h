@@ -1,8 +1,10 @@
 #ifndef DIFF_H
 #define DIFF_H
 
+#include <fstream>
 #include <list>
 #include <string>
+#include <variant>
 #include <vector>
 
 // Avoid "using namespace std;" at global scope in header.
@@ -50,7 +52,8 @@ class Edit {
         Edit();
         std::string toString() const;
 
-        static std::string strOperation(Operation op);
+        static std::string opPrefix(Operation op);
+        static std::string opColor(Operation op);
 };
 
 /**
@@ -79,7 +82,7 @@ class Differ {
         /**
          * Find the differences between two text inputs.
          */
-        void compare(T& input1, T& input2);
+        void compare(const T& input1, const T& input2);
 
         /**
          * Outputs the diff result.
