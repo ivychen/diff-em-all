@@ -7,6 +7,8 @@ run `./main origin.txt new.txt` for testing
 
 The Canterurbury corpus used for testing compression algoritms is used here to measure performance differences between files of varying length : https://corpus.canterbury.ac.nz/
 
+ Used to download files > 100MB : https://fastest.fish/test-files
+
 The test folder contains unit tests, integration tests and performance tests
 
 The performance analysis is mainly done on files of varying sizes. The different use cases are :
