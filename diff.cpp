@@ -1,7 +1,7 @@
 #include <string>
+#include <sstream>
 #include <vector>
 #include <iostream>
-#include <fstream>
 #include <algorithm>
 // Use quoted form of #include. See https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else.
 #include "diff.h"
@@ -46,7 +46,7 @@ string Edit::opPrefix(Operation op) {
     throw "Invalid operation.";
 }
 
-string Edit::opColor(Operation op) {
+string Edit::opColor(const Operation op) {
     switch(op) {
         case Operation::INSERT:
             return GREEN;
@@ -74,83 +74,50 @@ string Edit::toString() const {
 
 //////////////////////////
 //
-// Differ Class
+// Diff Class
 //
 //////////////////////////
 
 template <typename T>
-Differ<T>::Differ() :
+Diff<T>::Diff() :
     diff_mode(Mode::LINE) {
-
-    /*
-     *path is not available unitl MacOS 10.15
-     */
-
-    /*filesystem::path f1 = o;
-    filesystem::path f2 = u;
-    if (!exists(f1))
-        throw filesystem_error{"File does not exist: ", o};
-    if (!exists(f2))
-        throw filesystem_error{"File does not exist: ", u};*/
 }
 
 template <typename T>
-void Differ<T>::read(const T& o, const T& u) {
-    parse_files(o, u);
+Diff<T>::~Diff() {
 }
 
 template <typename T>
-void Differ<T>::parse_files(const T& o, const T& u) {
-    string line;
+std::vector<Edit> Diff<T>::compare(const T& input1, const T& input2) {
+    std::vector<T> original;
+    std::vector<T> updated;
 
-    ifstream original_ifs {o};
-    ifstream new_ifs {u};
-    if (original_ifs.is_open())
-    {
-        while (getline(original_ifs,line))
-        {
-            if (line.size() > 0) {
-                line += '\n';
-                original.push_back(line);
-            }
+    if (diff_mode == Mode::CHARACTER) {
+        // Convert lines to characters.
+        for (auto c : input1) {
+            string s(1, c);
+            original.push_back(s);
         }
-        original_ifs.close();
-    }
 
-    if (new_ifs.is_open())
-    {
-        while (getline(new_ifs,line))
-        {
-            if (line.size() > 0) {
-                line += '\n';
-                updated.push_back(line);
-            }
+        for (auto c : input2) {
+            string s(1, c);
+            updated.push_back(s);
         }
-        new_ifs.close();
-    }
-}
+    } else {
+        // Convert lines.
+        std::istringstream i1(input1);
+        std::istringstream i2(input2);
+        std::string line;
+        
+        while (std::getline(i1, line)) {
+            line.push_back('\n');
+            original.push_back(line);
+        }
 
-template <typename T>
-void Differ<T>::parse_text() {
-
-}
-
-template <typename T>
-void Differ<T>::compare() {
-    return compare(original, updated);
-}
-
-template <typename T>
-void Differ<T>::compare(const T& input1, const T& input2) {
-    // Convert lines to characters.
-    for (auto c : input1) {
-        string s(1, c);
-        original.push_back(s);
-    }
-
-    for (auto c : input2) {
-        string s(1, c);
-        updated.push_back(s);
+        while (std::getline(i2, line)) {
+            line.push_back('\n');
+            updated.push_back(line);
+        }
     }
 
     // Perform diff.
@@ -158,40 +125,10 @@ void Differ<T>::compare(const T& input1, const T& input2) {
 }
 
 template <typename T>
-void Differ<T>::compare(vector<T> original, vector<T> updated) {
-    int n = original.size();
-    int m = updated.size();
-    int max = n + m;
+std::vector<Edit> Diff<T>::compare(vector<T> original, vector<T> updated) {
+    // Compute the trace.
+    compute_trace(original, updated);
 
-    vector<int> v(2 * max + 1);
-    v[1+max] = 0;
-    int d, k, x, y;
-    for (d = 0; d <= max; d=d+1) {
-        for (k = -d; k <= d; k=k+2) {
-            if ( k == -d || (k != d && v[k - 1 + max] < v[k + 1 + max])) {
-                x = v[k + 1 + max];
-            }
-            else {
-                x = v[k - 1 + max] + 1;
-            }
-            y = x - k;
-            while (x < n && y < m && original[x] == updated[y]) {
-                // Skip over common substring
-                x = x + 1;
-                y = y + 1;
-            }
-            v[k + max] = x;
-            if (x >= n && y >= m) {
-                trace.push_back(v);
-                return;
-            }
-        }
-        trace.push_back(v);
-    }
-}
-
-template <typename T>
-vector<Edit> Differ<T>::output() {
     // Compute the diff result.
     vector<Edit> result;
 
@@ -241,22 +178,39 @@ vector<Edit> Differ<T>::output() {
     return result;
 }
 
+template <typename T>
+void Diff<T>::compute_trace(vector<T> original, vector<T> updated) {
+    int n = original.size();
+    int m = updated.size();
+    int max = n + m;
 
-int main(int argc, const char* argv[]) {
-    if (argc != 3) {
-        cout << "Two arguments are expected\n.";
-        return -1;
-    }
-
-    string original {argv[1]};
-    string updated {argv[2]};
-    Differ<string> differ;
-    // differ.read(original, updated);
-    // differ.compare();
-    differ.compare(original, updated);
-    auto result = differ.output();
-
-    for (auto& edit : result) {
-        cout << edit.toString() << endl;
+    // Compute the trace.
+    vector<int> v(2 * max + 1);
+    v[1+max] = 0;
+    int d, k, x, y;
+    for (d = 0; d <= max; d=d+1) {
+        for (k = -d; k <= d; k=k+2) {
+            if ( k == -d || (k != d && v[k - 1 + max] < v[k + 1 + max])) {
+                x = v[k + 1 + max];
+            }
+            else {
+                x = v[k - 1 + max] + 1;
+            }
+            y = x - k;
+            while (x < n && y < m && original[x] == updated[y]) {
+                // Skip over common substring
+                x = x + 1;
+                y = y + 1;
+            }
+            v[k + max] = x;
+            if (x >= n && y >= m) {
+                trace.push_back(v);
+                return;
+            }
+        }
+        trace.push_back(v);
     }
 }
+
+// See https://bytefreaks.net/programming-2/c/c-undefined-reference-to-templated-class-function.
+template class Diff<std::string>;

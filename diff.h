@@ -4,7 +4,6 @@
 #include <fstream>
 #include <list>
 #include <string>
-#include <variant>
 #include <vector>
 
 // Avoid "using namespace std;" at global scope in header.
@@ -19,10 +18,10 @@
  * Enum represents diff operation.
  * Prefer class enum, see https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#enum3-prefer-class-enums-over-plain-enums.
  */
-enum class Operation {
-    INSERT,
-    DELETE,
-    EQUAL,
+enum Operation {
+    INSERT = 1,
+    DELETE = -1,
+    EQUAL = 0,
 };
 
 /**
@@ -57,59 +56,37 @@ class Edit {
 };
 
 /**
- * Class representing a differ that executes diff logic.
+ * Class encapsulating diff logic.
  */
 template <typename T>
-class Differ {
+class Diff {
 
     public:
         // Default configuration.
         Mode diff_mode = Mode::LINE;
 
     public:
-        Differ();
-
-        /**
-         * Read and parse inputs.
-         */
-        void read(const T&, const T&);
+        Diff();
 
         /**
          * Find the differences between two text inputs.
          */
-        void compare();
+        std::vector<Edit> compare(const T& input1, const T& input2);
 
-        /**
-         * Find the differences between two text inputs.
-         */
-        void compare(const T& input1, const T& input2);
-
-        /**
-         * Outputs the diff result.
-         */
-        std::vector<Edit> output();
-        
-        ~Differ(){};
+        ~Diff();
 
     private:
-        std::vector<T> original;
-        std::vector<T> updated;
-        std::vector<std::vector<int>> trace;
-
-        /**
-         * Read and parse inputs from files.
-         */
-        void parse_files(const T&, const T&);
-
-        /**
-         * Read and parse inputs from raw text.
-         */
-        void parse_text();
+        std::vector<std::vector<int> > trace;
 
         /**
          * Find the differences between two text inputs.
          */
-        void compare(std::vector<T> original, std::vector<T> updated);
+        std::vector<Edit> compare(std::vector<T> original, std::vector<T> updated);
+
+        /**
+         * Computes the diff trace.
+         */
+        void compute_trace(std::vector<T> original, std::vector<T> updated);
 };
 
 #endif // DIFF_H
