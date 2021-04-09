@@ -2,6 +2,10 @@
 
 The Diff library implements Myer's diff algorithm for performing text diffs.
 
+## Documentation / Code Manual
+
+[Link to documentation](https://ivychen.github.io/diff-em-all/index.html)
+
 ## How to Run
 
 run `make`
