@@ -12,8 +12,6 @@
 #define RED     "\033[31m"      /* Red */
 #define GREEN   "\033[32m"      /* Green */
 
-using namespace std;
-
 //////////////////////////
 //
 // Edit Class
@@ -26,7 +24,7 @@ using namespace std;
  * @param pre_line The original text associated with this operation.
  * @param pos_line The new text associated with this operation.
  */
-Edit::Edit(Operation _operation, const string& _pre_line, const string& _pos_line) :
+Edit::Edit(Operation _operation, const std::string& _pre_line, const std::string& _pos_line) :
     operation(_operation), pre_line(_pre_line), pos_line(_pos_line) {
     // Construct an edit with specified operation and text. 
 }
@@ -34,7 +32,7 @@ Edit::Edit(Operation _operation, const string& _pre_line, const string& _pos_lin
 Edit::Edit() {
 }
 
-string Edit::opPrefix(Operation op) {
+std::string Edit::opPrefix(Operation op) {
     switch(op) {
         case Operation::INSERT:
             return "+";
@@ -46,7 +44,7 @@ string Edit::opPrefix(Operation op) {
     throw "Invalid operation.";
 }
 
-string Edit::opColor(const Operation op) {
+std::string Edit::opColor(const Operation op) {
     switch(op) {
         case Operation::INSERT:
             return GREEN;
@@ -62,8 +60,8 @@ string Edit::opColor(const Operation op) {
  * Display a human-readable version of this Edit.
  * @return text version
  */
-string Edit::toString() const {
-    string text;
+std::string Edit::toString() const {
+    std::string text;
     if (operation == Operation::DELETE) {
         text = pre_line;
     } else {
@@ -95,12 +93,12 @@ std::vector<Edit> Diff<T>::compare(const T& input1, const T& input2) {
     if (diff_mode == Mode::CHARACTER) {
         // Convert lines to characters.
         for (auto c : input1) {
-            string s(1, c);
+            std::string s(1, c);
             original.push_back(s);
         }
 
         for (auto c : input2) {
-            string s(1, c);
+            std::string s(1, c);
             updated.push_back(s);
         }
     } else {
@@ -125,12 +123,12 @@ std::vector<Edit> Diff<T>::compare(const T& input1, const T& input2) {
 }
 
 template <typename T>
-std::vector<Edit> Diff<T>::compare(vector<T> original, vector<T> updated) {
+std::vector<Edit> Diff<T>::compare(std::vector<T> original, std::vector<T> updated) {
     // Compute the trace.
     compute_trace(original, updated);
 
     // Compute the diff result.
-    vector<Edit> result;
+    std::vector<Edit> result;
 
     // Reverse the trace.
     reverse(trace.begin(), trace.end());
@@ -179,13 +177,13 @@ std::vector<Edit> Diff<T>::compare(vector<T> original, vector<T> updated) {
 }
 
 template <typename T>
-void Diff<T>::compute_trace(vector<T> original, vector<T> updated) {
+void Diff<T>::compute_trace(std::vector<T> original, std::vector<T> updated) {
     int n = original.size();
     int m = updated.size();
     int max = n + m;
 
     // Compute the trace.
-    vector<int> v(2 * max + 1);
+    std::vector<int> v(2 * max + 1);
     v[1+max] = 0;
     int d, k, x, y;
     for (d = 0; d <= max; d=d+1) {
