@@ -1,6 +1,6 @@
 # Diff Em All
 
-The Diff library offers a robust algorithm for performing text diffs.
+The Diff library implements Myer's diff algorithm for performing text diffs.
 
 ## How to Run
 
