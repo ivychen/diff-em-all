@@ -2,6 +2,10 @@
 
 The Diff library implements Myer's diff algorithm for performing text diffs.
 
+## Authors
+
+Ivy Chen (ic2389), Sughosh Kaushik (svk2117), Yue Jiao (yj2285)
+
 ## Documentation / Code Manual
 
 [Link to documentation](https://ivychen.github.io/diff-em-all/index.html)
