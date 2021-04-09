@@ -1,5 +1,8 @@
-# cs4995-cpp
-COMS4995 Design using C++ project
+# Diff Em All
+
+The Diff library offers a robust algorithm for performing text diffs.
+
+## How to Run
 
 run `make`
 
