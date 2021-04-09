@@ -21,3 +21,8 @@ We decided that the scope of our Diff library was too broad and decided to remov
 - [diff-match-patch library](https://github.com/google/diff-match-patch)
 - [myers-diff library](https://github.com/gritzko/myers-diff)
 - [Myer's Diff Algorithm explanation](https://blog.jcoglan.com/2017/02/12/the-myers-diff-algorithm-part-1/)
+- http://link.springer.com/article/10.1007/BF01840446
+- http://alfedenzo.livejournal.com/170301.html
+- https://github.com/git/git/commit/8c912eea94a2138e8bc608f7c3
+- http://www.daemonology.net/bsdiff/
+- https://www.chromium.org/developers/design-documents/software-updates-courgette

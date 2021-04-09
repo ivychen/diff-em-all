@@ -3,7 +3,7 @@ CXXFLAGS = -c -Wall -std=c++2a -O2 -Wno-c++11-extensions
 
 all: main
 
-main: main.o diff.o
+main: main.o
 	$(CXX) -o $@ $^
 
 %.o: %.cpp
