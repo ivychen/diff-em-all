@@ -24,7 +24,6 @@
 
 /**
  * Enum represents diff operation.
- * Prefer class enum, see https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#enum3-prefer-class-enums-over-plain-enums.
  */
 enum Operation {
     INSERT = 1,
@@ -34,6 +33,7 @@ enum Operation {
 
 /**
  * Enum represents diff mode.
+ * Prefer class enum, see https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#enum3-prefer-class-enums-over-plain-enums.
  */
 enum class Mode {
     CHARACTER,
