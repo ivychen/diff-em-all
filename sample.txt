@@ -1,0 +1,7 @@
+.foo1 {
+    margin: 0;
+}
+
+.bar {
+    margin: 0;
+}
