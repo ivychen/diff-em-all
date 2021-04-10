@@ -1,0 +1,8 @@
+.bar {
+    margin: 0;
+}
+
+.foo1 {
+    margin: 1;
+    color: green;
+}
