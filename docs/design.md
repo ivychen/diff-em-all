@@ -14,8 +14,14 @@ We started with a simple program that read in two files and printed out their co
 
 ### Scope
 
-We decided that the scope of our Diff library was too broad and decided to remove input parsing (reading from files) and printing out the diff output. We also wanted to be able to diff text inputs with different levels of granularity eg. char-based diff vs. line-based diff. Our current class defaults to line-based diff because we expect that users of our library will be performing diffs over multiline files, e.g., source code, plaintext, etc.
+We decided that the scope of our Diff library was too broad and decided to remove input parsing (reading from files) and printing out the diff output. We also wanted to be able to diff text inputs with different levels of granularity eg. char-based diff vs. line-based diff. As a result, our class is a templated class that allows performing diffs over different types. Our current class defaults to line-based diff because we expect that users of our library will be performing diffs over multiline files, e.g., source code, plaintext, etc.
 
+Since we have a templated class, we needed to account for C++ `undefined reference to` compiler error at linking. There are normally 3 ways to resolve this issue:
+- Explicitly instantiate the template. This would require us to specify all the needed templates.
+- Move the implementation code into the header file.
+- Move the implementation code into a new header file and include it in the original header file.
+
+We opted to move our implementation into the header to create a header-only library. While this increases compilation time, we decided that it would also offer the most flexibility for future development (eg. automatically supporting new data types) and would be easiet for the end user's build process.
 
 ## References
 - [diff-match-patch library](https://github.com/google/diff-match-patch)
@@ -26,3 +32,5 @@ We decided that the scope of our Diff library was too broad and decided to remov
 - https://github.com/git/git/commit/8c912eea94a2138e8bc608f7c3
 - http://www.daemonology.net/bsdiff/
 - https://www.chromium.org/developers/design-documents/software-updates-courgette
+- https://bytefreaks.net/programming-2/c/c-undefined-reference-to-templated-class-function
+- https://github.com/isocpp/CppCoreGuidelines
