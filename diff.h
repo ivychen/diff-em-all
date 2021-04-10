@@ -198,12 +198,12 @@ class Diff {
                 y = prev_y;
             }
 
-            // At the end of the trace run, x should equal y. We may have remaining tokens (all EQUAL operations) to include in the result so we iterate until both x and y are exhausted.
-            while (x == y && x > 0 && y > 0) {
-                result.push_back(Edit(Operation::EQUAL, original[x-1]));
-                x--;
-                y--;
-            }
+            // // At the end of the trace run, x should equal y. We may have remaining tokens (all EQUAL operations) to include in the result so we iterate until both x and y are exhausted.
+            // while (x == y && x > 0 && y > 0) {
+            //     result.push_back(Edit(Operation::EQUAL, original[x-1]));
+            //     x--;
+            //     y--;
+            // }
 
             reverse(result.begin(), result.end());
             return result;
