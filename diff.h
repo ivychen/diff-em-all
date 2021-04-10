@@ -47,17 +47,15 @@ enum class Mode {
 class Edit {
     public:
         Operation operation; // One of: INSERT, DELETE, EQUAL.
-        std::string pre_line;     // The original text associated with this diff operation.
-        std::string pos_line;     // The new text associated with this diff operation.
+        std::string text;     // The text associated with this diff operation.
 
         /**
          * Constructor. Initialized the diff with the provided values.
          * @param operation One of INSERT, DELETE, EQUAL.
-         * @param pre_line The original text associated with this operation.
-         * @param pos_line The new text associated with this operation.
+         * @param text The text associated with this diff operation.
          */
-        Edit(Operation _operation, const std::string& _pre_line, const std::string& _pos_line) :
-            operation(_operation), pre_line(_pre_line), pos_line(_pos_line) {
+        Edit(Operation _operation, const std::string& _text) :
+            operation(_operation), text(_text) {
             // Construct an edit with specified operation and text. 
         }
 
@@ -68,12 +66,6 @@ class Edit {
          * Displays a human-readable version of the Edit operation.
          */
         std::string toString() const {
-            std::string text;
-            if (operation == Operation::DELETE) {
-                text = pre_line;
-            } else {
-                text = pos_line;
-            }
             return opColor(operation) + opPrefix(operation) + " " + text + RESET;
         }
 
@@ -192,15 +184,15 @@ class Diff {
                 prev_x = trace[i+1][prev_k + max];
                 prev_y = prev_x - prev_k;
                 while (x > prev_x && y > prev_y) {
-                    result.push_back(Edit(Operation::EQUAL, original[x-1], updated[y-1]));
+                    result.push_back(Edit(Operation::EQUAL, original[x-1]));
                     x = x - 1;
                     y = y - 1;
                 }
                 if (x == prev_x) {
-                    result.push_back(Edit(Operation::INSERT, "", updated[prev_y]));
+                    result.push_back(Edit(Operation::INSERT, updated[prev_y]));
                 }
                 else if (y == prev_y) {
-                    result.push_back(Edit(Operation::DELETE, original[prev_x], ""));
+                    result.push_back(Edit(Operation::DELETE, original[prev_x]));
                 }
                 x = prev_x;
                 y = prev_y;
@@ -208,7 +200,7 @@ class Diff {
 
             // At the end of the trace run, x should equal y. We may have remaining tokens (all EQUAL operations) to include in the result so we iterate until both x and y are exhausted.
             while (x == y && x > 0 && y > 0) {
-                result.push_back(Edit(Operation::EQUAL, original[x-1], updated[y-1]));
+                result.push_back(Edit(Operation::EQUAL, original[x-1]));
                 x--;
                 y--;
             }
