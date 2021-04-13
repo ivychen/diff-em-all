@@ -21,7 +21,7 @@ Semantic diff performs a "context-aware" analysis of the differences between two
 
 We started with a simple program that read in two files and printed out their contents line-by-line. Then we designed a simple templated Diff class and implemented Myer's diff algorithm using dynamic programming to diff two files line-by-line. We originally encapsulated all the program logic in the class i.e., the class contained the logic for parsing, running the diff algorithm, and producing a diff result output. However, we decided to reduce the scope of the class later on.
 
-## Scope
+## Implementation
 
 We decided that the scope of our Diff library was too broad and decided to remove input parsing (reading from files) and printing out the diff output. We also wanted to be able to diff text inputs with different levels of granularity eg. char-based diff vs. line-based diff. As a result, our class is a templated class that allows performing diffs over different types. Our current class defaults to line-based diff because we expect that users of our library will be performing diffs over multiline files, e.g., source code, plaintext, etc.
 
@@ -39,6 +39,9 @@ Supporting semantic diffs using off-the-shelf parsers requires taking a dependen
 
 ### Benchmark performance with other diff libraries
 Benchmark performance with other diff libraries such as LibXDiff in C.
+
+### C++20 Concepts
+The current Myer's diff algorithm assumes the data type is comparable. We can add C++20 concepts to enforce that the template data type must be a type that is comparable (eg. using the `==` and `!=` operators). This allows us to enforce a compile-time check to ensure that the data type is one our algorithm can run over rather than discover an error at runtime.
 
 ## References
 - [diff-match-patch library](https://github.com/google/diff-match-patch)
